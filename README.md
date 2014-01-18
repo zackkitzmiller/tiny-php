@@ -37,3 +37,51 @@ echo $tiny->from('E');
 ## Configuration
 
 You must instanciate a new instance of Tiny with a random alpha-numeric set. Do **NOT** change this once you start using Tiny, as you won't be able to reverse.
+
+# Changes by golonka
+
+Fork by [Joseph Landberg](https://github.com/golonka)
+
+## Installation in Laravel 4
+
+### First add this to your composer.json file
+```json
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/golonka/tiny"
+        }
+    ],
+    "require": {
+        ...
+        "zackkitzmiller/tiny": "dev-laravel"
+    }
+}
+```
+Then open your ``app/config/app.php`` file and scroll down to your providers and add
+```php
+'providers' => array(
+    ...
+    'ZackKitzmiller\Tiny\TinyServiceProvider',
+)
+```
+and then this to aliases
+```php
+'aliases' => array(
+    ...
+    'Tiny' => 'ZackKitzmiller\Tiny\Facades\Tiny',
+)
+```
+Then you open your terminal and run ``composer update``
+
+Lastly you run ``php artisan config:publish zackkitzmiller/tiny`` and fill in your key.
+
+## Usage in Laravel
+```php
+echo Tiny::to(5);
+// echos E
+
+echo Tiny::from('E');
+// echos 5
+```
