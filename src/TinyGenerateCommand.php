@@ -2,6 +2,7 @@
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Foundation\Application;
 
 class TinyGenerateCommand extends Command
 {
@@ -19,15 +20,42 @@ class TinyGenerateCommand extends Command
 
     public function fire()
     {
-        list($path, $contents) = $this->getKeyFile();
-
         $key = Tiny::generate_set();
+        
+        //Parse Laravel Version
+        $pattern = '/(?P<major>\d+)\.(?P<minor>\d+)(?:\.(?P<hotfix>\d+))/';
 
-        $contents = str_replace($this->laravel['config']['league/tiny::key'], $key, $contents);
+        if (!preg_match($pattern, Application::VERSION, $version)) {
+            $this->warning('Could not detect a version of Laravel. Pre-Laravel 5 behaviour assumed. Writing Key to config file.');
+        }
 
-        $this->files->put($path, $contents);
+        if (is_array($version) && $version['major'] >= '5') {
+            //Laravel 5 integrates vlucas' dotenv, so store key in .ENV file.
+            $path = base_path('.env');
 
-        $this->laravel['config']['league/tiny::key'] = $key;
+            if (file_exists($path) && getenv('LEAGUE_TINY_KEY') !== false) {
+                //Already set, so replace it.
+                file_put_contents($path, str_replace(
+                    'LEAGUE_TINY_KEY='.getenv('LEAGUE_TINY_KEY'), 'LEAGUE_TINY_KEY='.$key, file_get_contents($path)
+                ));
+            } else {
+                //Append it to the bottom
+                $fp = fopen($path, 'a');
+                fwrite($fp, "\nLEAGUE_TINY_KEY=$key\n");
+                fclose($fp);
+            }
+
+        } else {
+            //If Version 4, or default, store file in config file, as per before.
+            list($path, $contents) = $this->getKeyFile();
+
+            $contents = str_replace($this->laravel['config']['league/tiny::key'], $key, $contents);
+            
+            $this->files->put($path, $contents);
+
+            $this->laravel['config']['league/tiny::key'] = $key;
+
+        } 
 
         $this->info("Tiny key [$key] has been set.");
     }
