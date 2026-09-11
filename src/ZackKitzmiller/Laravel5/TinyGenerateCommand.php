@@ -12,7 +12,7 @@ use ZackKitzmiller\Tiny;
 
 class TinyGenerateCommand extends Command
 {
-    protected $signature = 'tiny:generate';
+    protected $signature = 'tiny:generate {--env=}';
 
     protected $description = 'Generate a valid key';
 

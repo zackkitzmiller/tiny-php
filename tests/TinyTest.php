@@ -147,4 +147,14 @@ final class TinyTest extends TestCase
             EnvironmentKeyUpdater::updateContents($contents, 'value$1\\path')
         );
     }
+
+    public function testEnvironmentKeyUpdaterPrefersTinyKeyWhenBothKeysExist(): void
+    {
+        $contents = "TINY_KEY=old-primary\nLEAGUE_TINY_KEY=old-legacy\n";
+
+        self::assertSame(
+            "TINY_KEY=new-key\nLEAGUE_TINY_KEY=old-legacy\n",
+            EnvironmentKeyUpdater::updateContents($contents, 'new-key')
+        );
+    }
 }

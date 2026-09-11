@@ -56,6 +56,6 @@ class TinyServiceProvider extends ServiceProvider
 
     private static function configPath(): string
     {
-        return dirname(__DIR__, 2) . '/config/config.php';
+        return dirname(__DIR__, 3) . '/src/config/config.php';
     }
 }
