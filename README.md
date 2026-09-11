@@ -66,6 +66,8 @@ $set = \ZackKitzmiller\Tiny::generateSet();
 
 The legacy `Tiny::generate_set()` helper is still available for backwards compatibility.
 
+This release does introduce a package-level modernization break: Composer autoloading now uses PSR-4 for `ZackKitzmiller\\` classes, so consumers relying on older PSR-0-era assumptions should verify their integration when upgrading.
+
 ## Development
 
 ```bash
