@@ -1,7 +1,8 @@
 <?php
 
-return array(
+declare(strict_types=1);
 
+return [
     /*
     |--------------------------------------------------------------------------
     | TinyPHP key
@@ -10,7 +11,5 @@ return array(
     | Key that the Tiny class uses.
     |
     */
-
     'key' => '',
-
-);
+];

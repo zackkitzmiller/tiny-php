@@ -1,33 +1,56 @@
-<?php namespace ZackKitzmiller\Laravel5;
+<?php
 
-use ZackKitzmiller\Tiny;
+declare(strict_types=1);
+
+namespace ZackKitzmiller\Laravel5;
+
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use RuntimeException;
+use ZackKitzmiller\Tiny;
 
-class TinyGenerateCommand extends Command {
+class TinyGenerateCommand extends Command
+{
+    protected $signature = 'tiny:generate';
 
-    protected $name = 'tiny:generate';
+    protected $description = 'Generate a valid key';
 
-    protected $description = "Generate a valid key";
-
-    public function fire()
+    public function handle(): int
     {
-        $key = Tiny::generate_set();
-
+        $key = Tiny::generateSet();
         $path = base_path('.env');
+        $currentKey = getenv('TINY_KEY') ?: getenv('LEAGUE_TINY_KEY') ?: null;
 
-        if (file_exists($path) and getenv('LEAGUE_TINY_KEY') !== false) {
+        if (is_file($path)) {
             $originalContent = file_get_contents($path);
-            $content = str_replace('LEAGUE_TINY_KEY='.getenv('LEAGUE_TINY_KEY'), 'LEAGUE_TINY_KEY='.$key, $originalContent);
 
-            file_put_contents($path, $content);
+            if ($originalContent === false) {
+                throw new RuntimeException(sprintf('Unable to read environment file at %s.', $path));
+            }
+
+            if ($currentKey !== null) {
+                $content = str_replace(
+                    ["TINY_KEY={$currentKey}", "LEAGUE_TINY_KEY={$currentKey}"],
+                    "TINY_KEY={$key}",
+                    $originalContent
+                );
+            } else {
+                $content = rtrim($originalContent) . PHP_EOL . "TINY_KEY={$key}" . PHP_EOL;
+            }
         } else {
-            $fp = fopen($path, 'a');
-            fwrite($fp, "\nLEAGUE_TINY_KEY=$key\n");
-            fclose($fp);
+            $content = "TINY_KEY={$key}" . PHP_EOL;
         }
 
-        $this->info("Tiny key [$key] has been set.");
+        if (file_put_contents($path, $content) === false) {
+            throw new RuntimeException(sprintf('Unable to write environment file at %s.', $path));
+        }
+
+        $this->info("Tiny key [{$key}] has been set.");
+
+        return self::SUCCESS;
     }
 
+    public function fire(): int
+    {
+        return $this->handle();
+    }
 }
