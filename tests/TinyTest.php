@@ -43,6 +43,11 @@ final class TinyTest extends TestCase
         self::assertSame($this->tiny->to(25), $this->tiny->to('0025'));
     }
 
+    public function testNegativeNumericStringsAreNormalized(): void
+    {
+        self::assertSame($this->tiny->to(25), $this->tiny->to('-25'));
+    }
+
     public function testGenerateRandomSetsWork(): void
     {
         for ($i = 0; $i <= 100; $i++) {
