@@ -62,7 +62,10 @@ class Tiny
             ...range('0', '9'),
         ];
 
-        shuffle($characters);
+        for ($i = count($characters) - 1; $i > 0; $i--) {
+            $swapIndex = random_int(0, $i);
+            [$characters[$i], $characters[$swapIndex]] = [$characters[$swapIndex], $characters[$i]];
+        }
 
         return implode('', $characters);
     }
