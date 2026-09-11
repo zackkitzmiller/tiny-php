@@ -86,6 +86,10 @@ class Tiny
     private function normalizeId(int|string $id): int
     {
         if (is_int($id)) {
+            if ($id === PHP_INT_MIN) {
+                throw new InvalidArgumentException('Tiny cannot encode values smaller than PHP_INT_MIN + 1.');
+            }
+
             return abs($id);
         }
 
@@ -93,6 +97,20 @@ class Tiny
             throw new InvalidArgumentException('Tiny can only encode whole-number integers.');
         }
 
-        return abs((int) $id);
+        $normalized = ltrim($id, '+-');
+        $normalized = ltrim($normalized, '0');
+        $normalized = $normalized === '' ? '0' : $normalized;
+
+        if (
+            strlen($normalized) > strlen((string) PHP_INT_MAX)
+            || (
+                strlen($normalized) === strlen((string) PHP_INT_MAX)
+                && strcmp($normalized, (string) PHP_INT_MAX) > 0
+            )
+        ) {
+            throw new InvalidArgumentException('Tiny can only encode integers within PHP\'s native integer range.');
+        }
+
+        return abs((int) $normalized);
     }
 }

@@ -90,6 +90,13 @@ final class TinyTest extends TestCase
         $this->tiny->to('12abc');
     }
 
+    public function testToRejectsOutOfRangeNumericStrings(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->tiny->to((string) PHP_INT_MAX . '0');
+    }
+
     public function testEnvironmentKeyUpdaterReplacesExistingKeys(): void
     {
         $contents = "APP_ENV=testing\nLEAGUE_TINY_KEY=old-key\n";
