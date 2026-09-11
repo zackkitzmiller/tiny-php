@@ -1,56 +1,85 @@
-<?php namespace ZackKitzmiller;
+<?php
 
-class Tiny {
+declare(strict_types=1);
 
-    protected $set = null;
+namespace ZackKitzmiller;
 
-    public function __construct($set) {
+use InvalidArgumentException;
+
+class Tiny
+{
+    private string $set;
+
+    public function __construct(string $set)
+    {
+        self::assertValidSet($set);
+
         $this->set = $set;
     }
 
-    public function to($id)
+    public function to(int|string $id): string
     {
-        $set = $this->set;
+        $encoded = '';
+        $value = abs((int) $id);
+        $radix = strlen($this->set);
 
-        $hexn = '';
-        $id = floor(abs(intval($id)));
-        $radix = strlen($set);
-        while (true) {
-            $r = $id % $radix;
-            $hexn = $set[$r] . $hexn;
-            $id = ($id - $r) / $radix;
-            if ($id == 0) {
-                break;
+        do {
+            $remainder = $value % $radix;
+            $encoded = $this->set[$remainder] . $encoded;
+            $value = intdiv($value - $remainder, $radix);
+        } while ($value > 0);
+
+        return $encoded;
+    }
+
+    public function from(string $value): int
+    {
+        if ($value === '') {
+            return 0;
+        }
+
+        $radix = strlen($this->set);
+        $decoded = 0;
+
+        foreach (str_split($value) as $character) {
+            $position = strpos($this->set, $character);
+
+            if ($position === false) {
+                throw new InvalidArgumentException(sprintf('Character "%s" is not in the Tiny character set.', $character));
             }
+
+            $decoded = ($decoded * $radix) + $position;
         }
-        return $hexn;
+
+        return $decoded;
     }
 
-    public function from($str)
+    public static function generateSet(): string
     {
-        $set = $this->set;
+        $characters = [
+            ...range('A', 'Z'),
+            ...range('a', 'z'),
+            ...range('0', '9'),
+        ];
 
-        $radix = strlen($set);
-        $strlen = strlen($str);
-        $n = 0;
-        for ($i = 0; $i < $strlen; $i++) {
-            $n += strpos($set, $str[$i]) * pow($radix, ($strlen - $i - 1));
-        }
-        return $n;
+        shuffle($characters);
+
+        return implode('', $characters);
     }
 
-    public static function generate_set()
+    public static function generate_set(): string
     {
-        $arr = array();
-
-        for ($i = 65; $i <= 122; $i++) {
-            if ($i < 91 || $i > 96) $arr[] = chr($i);
-        }
-
-        $arr = array_merge($arr, range(0, 9));
-        shuffle($arr);
-
-        return join('', $arr);
+        return self::generateSet();
     }
 
+    private static function assertValidSet(string $set): void
+    {
+        if (strlen($set) < 2) {
+            throw new InvalidCharacterSet('Tiny requires at least two unique characters in the set.');
+        }
+
+        if (count(array_unique(str_split($set))) !== strlen($set)) {
+            throw new InvalidCharacterSet('Tiny character sets must only contain unique characters.');
+        }
+    }
 }
