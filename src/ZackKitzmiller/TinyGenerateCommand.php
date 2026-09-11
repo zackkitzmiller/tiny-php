@@ -9,7 +9,7 @@ use Illuminate\Filesystem\Filesystem;
 
 class TinyGenerateCommand extends Command
 {
-    protected $name = 'tiny:generate';
+    protected $signature = 'tiny:generate';
 
     protected $description = 'Generate a valid key';
 
@@ -20,14 +20,13 @@ class TinyGenerateCommand extends Command
 
     public function handle(): int
     {
-        [$path, $contents] = $this->getKeyFile();
+        $path = base_path('.env');
+        $contents = is_file($path) ? $this->readEnvironmentFile($path) : '';
         $key = Tiny::generateSet();
-        $currentKey = (string) $this->laravel['config']['zackkitzmiller/tiny::key'];
+        $contents = EnvironmentKeyUpdater::updateContents($contents, $key);
 
-        $contents = str_replace($currentKey, $key, $contents);
-
-        $this->files->put($path, $contents);
-        $this->laravel['config']['zackkitzmiller/tiny::key'] = $key;
+        $this->writeEnvironmentFile($path, $contents);
+        $this->laravel['config']['tiny.key'] = $key;
 
         $this->info("Tiny key [{$key}] has been set.");
 
@@ -39,11 +38,21 @@ class TinyGenerateCommand extends Command
         return $this->handle();
     }
 
-    protected function getKeyFile(): array
+    private function readEnvironmentFile(string $path): string
     {
-        $env = $this->option('env') ? $this->option('env') . '/' : '';
-        $path = $this->laravel['path'] . "/config/packages/zackkitzmiller/tiny/{$env}config.php";
+        $content = $this->files->get($path);
 
-        return [$path, $this->files->get($path)];
+        if (! is_string($content)) {
+            throw new \RuntimeException(sprintf('Unable to read environment file at %s.', $path));
+        }
+
+        return $content;
+    }
+
+    private function writeEnvironmentFile(string $path, string $content): void
+    {
+        if ($this->files->put($path, $content) === false) {
+            throw new \RuntimeException(sprintf('Unable to write environment file at %s.', $path));
+        }
     }
 }

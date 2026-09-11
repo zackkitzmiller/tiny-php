@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace ZackKitzmiller\Laravel5;
 
 use Illuminate\Console\Command;
+use Illuminate\Filesystem\Filesystem;
 use RuntimeException;
+use ZackKitzmiller\EnvironmentKeyUpdater;
 use ZackKitzmiller\Tiny;
 
 class TinyGenerateCommand extends Command
@@ -14,35 +16,20 @@ class TinyGenerateCommand extends Command
 
     protected $description = 'Generate a valid key';
 
+    public function __construct(private readonly Filesystem $files)
+    {
+        parent::__construct();
+    }
+
     public function handle(): int
     {
         $key = Tiny::generateSet();
         $path = base_path('.env');
-        $currentKey = getenv('TINY_KEY') ?: getenv('LEAGUE_TINY_KEY') ?: null;
 
-        if (is_file($path)) {
-            $originalContent = file_get_contents($path);
+        $content = is_file($path) ? $this->readEnvironmentFile($path) : '';
+        $content = EnvironmentKeyUpdater::updateContents($content, $key);
 
-            if ($originalContent === false) {
-                throw new RuntimeException(sprintf('Unable to read environment file at %s.', $path));
-            }
-
-            if ($currentKey !== null) {
-                $content = str_replace(
-                    ["TINY_KEY={$currentKey}", "LEAGUE_TINY_KEY={$currentKey}"],
-                    "TINY_KEY={$key}",
-                    $originalContent
-                );
-            } else {
-                $content = rtrim($originalContent) . PHP_EOL . "TINY_KEY={$key}" . PHP_EOL;
-            }
-        } else {
-            $content = "TINY_KEY={$key}" . PHP_EOL;
-        }
-
-        if (file_put_contents($path, $content) === false) {
-            throw new RuntimeException(sprintf('Unable to write environment file at %s.', $path));
-        }
+        $this->writeEnvironmentFile($path, $content);
 
         $this->info("Tiny key [{$key}] has been set.");
 
@@ -52,5 +39,23 @@ class TinyGenerateCommand extends Command
     public function fire(): int
     {
         return $this->handle();
+    }
+
+    private function readEnvironmentFile(string $path): string
+    {
+        $content = $this->files->get($path);
+
+        if (! is_string($content)) {
+            throw new RuntimeException(sprintf('Unable to read environment file at %s.', $path));
+        }
+
+        return $content;
+    }
+
+    private function writeEnvironmentFile(string $path, string $content): void
+    {
+        if ($this->files->put($path, $content) === false) {
+            throw new RuntimeException(sprintf('Unable to write environment file at %s.', $path));
+        }
     }
 }

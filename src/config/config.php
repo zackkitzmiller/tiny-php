@@ -11,5 +11,5 @@ return [
     | Key that the Tiny class uses.
     |
     */
-    'key' => '',
+    'key' => env('TINY_KEY', env('LEAGUE_TINY_KEY', '')),
 ];
