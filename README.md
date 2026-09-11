@@ -61,7 +61,7 @@ After installing dependencies, generate a fresh 62-character alphabet with:
 You can also generate one in code:
 
 ```php
-$set = Tiny::generateSet();
+$set = \ZackKitzmiller\Tiny::generateSet();
 ```
 
 The legacy `Tiny::generate_set()` helper is still available for backwards compatibility.

@@ -20,7 +20,7 @@ class TinyGenerateCommand extends Command
 
     public function handle(): int
     {
-        $path = base_path('.env');
+        $path = $this->environmentFilePath();
         $contents = is_file($path) ? $this->readEnvironmentFile($path) : '';
         $key = Tiny::generateSet();
         $contents = EnvironmentKeyUpdater::updateContents($contents, $key);
@@ -54,5 +54,18 @@ class TinyGenerateCommand extends Command
         if ($this->files->put($path, $content) === false) {
             throw new \RuntimeException(sprintf('Unable to write environment file at %s.', $path));
         }
+    }
+
+    private function environmentFilePath(): string
+    {
+        if (method_exists($this->laravel, 'environmentFilePath')) {
+            return $this->laravel->environmentFilePath();
+        }
+
+        if (method_exists($this->laravel, 'basePath')) {
+            return $this->laravel->basePath('.env');
+        }
+
+        return $this->laravel['path.base'] . '/.env';
     }
 }
