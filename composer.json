@@ -35,6 +35,7 @@
     },
     "autoload": {
         "psr-4": {
+            "ZackKitzmiller\\Laravel5\\": "src/ZackKitzmiller/Laravel5/",
             "ZackKitzmiller\\": "src/ZackKitzmiller/"
         }
     },

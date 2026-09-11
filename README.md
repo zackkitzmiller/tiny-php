@@ -68,6 +68,8 @@ The legacy `Tiny::generate_set()` helper is still available for backwards compat
 
 This release does introduce a package-level modernization break: Composer autoloading now uses PSR-4 for `ZackKitzmiller\\` classes, so consumers relying on older PSR-0-era assumptions should verify their integration when upgrading.
 
+The Laravel integration classes continue to autoload from the `ZackKitzmiller\\Laravel5\\` namespace under `src/ZackKitzmiller/Laravel5/`.
+
 ## Development
 
 ```bash
