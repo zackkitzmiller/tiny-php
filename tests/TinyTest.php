@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
+use ZackKitzmiller\EnvironmentKeyUpdater;
 use ZackKitzmiller\InvalidCharacterSet;
 use ZackKitzmiller\Tiny;
 
@@ -35,6 +36,11 @@ final class TinyTest extends TestCase
     public function testNegativeValuesAreNormalized(): void
     {
         self::assertSame($this->tiny->to(25), $this->tiny->to(-25));
+    }
+
+    public function testNumericStringsAreSupported(): void
+    {
+        self::assertSame($this->tiny->to(25), $this->tiny->to('0025'));
     }
 
     public function testGenerateRandomSetsWork(): void
@@ -75,5 +81,32 @@ final class TinyTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
 
         $this->tiny->from('!');
+    }
+
+    public function testToRejectsNonIntegerStrings(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->tiny->to('12abc');
+    }
+
+    public function testEnvironmentKeyUpdaterReplacesExistingKeys(): void
+    {
+        $contents = "APP_ENV=testing\nLEAGUE_TINY_KEY=old-key\n";
+
+        self::assertSame(
+            "APP_ENV=testing\nTINY_KEY=new-key\n",
+            EnvironmentKeyUpdater::updateContents($contents, 'new-key')
+        );
+    }
+
+    public function testEnvironmentKeyUpdaterAppendsMissingKeys(): void
+    {
+        $contents = "APP_ENV=testing\n";
+
+        self::assertSame(
+            "APP_ENV=testing\nTINY_KEY=new-key\n",
+            EnvironmentKeyUpdater::updateContents($contents, 'new-key')
+        );
     }
 }

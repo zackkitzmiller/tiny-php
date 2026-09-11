@@ -20,7 +20,7 @@ class Tiny
     public function to(int|string $id): string
     {
         $encoded = '';
-        $value = abs((int) $id);
+        $value = $this->normalizeId($id);
         $radix = strlen($this->set);
 
         do {
@@ -81,5 +81,18 @@ class Tiny
         if (count(array_unique(str_split($set))) !== strlen($set)) {
             throw new InvalidCharacterSet('Tiny character sets must only contain unique characters.');
         }
+    }
+
+    private function normalizeId(int|string $id): int
+    {
+        if (is_int($id)) {
+            return abs($id);
+        }
+
+        if (! preg_match('/^[+-]?\d+$/', $id)) {
+            throw new InvalidArgumentException('Tiny can only encode whole-number integers.');
+        }
+
+        return abs((int) $id);
     }
 }

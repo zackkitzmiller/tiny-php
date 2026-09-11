@@ -6,26 +6,35 @@ namespace ZackKitzmiller\Laravel5;
 
 use Illuminate\Support\ServiceProvider;
 use RuntimeException;
+use ZackKitzmiller\EnvironmentKeyUpdater;
 use ZackKitzmiller\Tiny;
 
 class TinyServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->app->singleton('tiny.generate', static function () {
-            return new TinyGenerateCommand();
+        if (function_exists('config_path')) {
+            $this->publishes([
+                dirname(__DIR__) . '/config/config.php' => config_path('tiny.php'),
+            ], 'tiny-config');
+        }
+
+        $this->app->singleton('tiny.generate', static function ($app) {
+            return new TinyGenerateCommand($app['files']);
         });
 
-        $this->commands('tiny.generate');
+        $this->commands(['tiny.generate']);
     }
 
     public function register(): void
     {
+        $this->mergeConfigFrom(dirname(__DIR__) . '/config/config.php', 'tiny');
+
         $this->app->singleton('tiny', static function () {
-            $key = getenv('TINY_KEY') ?: getenv('LEAGUE_TINY_KEY');
+            $key = config('tiny.key') ?: getenv(EnvironmentKeyUpdater::PRIMARY_KEY) ?: getenv(EnvironmentKeyUpdater::LEGACY_KEY);
 
             if (! is_string($key) || $key === '') {
-                throw new RuntimeException('A Tiny character set must be configured via TINY_KEY or LEAGUE_TINY_KEY.');
+                throw new RuntimeException('A Tiny character set must be configured before resolving the Tiny service.');
             }
 
             return new Tiny($key);
