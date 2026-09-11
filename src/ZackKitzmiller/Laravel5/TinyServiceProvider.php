@@ -31,7 +31,15 @@ class TinyServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(self::configPath(), 'tiny');
 
         $this->app->singleton('tiny', static function ($app) {
-            $key = $app['config']->get('tiny.key') ?: getenv(EnvironmentKeyUpdater::PRIMARY_KEY) ?: getenv(EnvironmentKeyUpdater::LEGACY_KEY);
+            $key = $app['config']->get('tiny.key');
+
+            if ($key === null || $key === false) {
+                $key = getenv(EnvironmentKeyUpdater::PRIMARY_KEY);
+            }
+
+            if ($key === false) {
+                $key = getenv(EnvironmentKeyUpdater::LEGACY_KEY);
+            }
 
             if (! is_string($key) || $key === '') {
                 throw new RuntimeException('A Tiny character set must be configured before resolving the Tiny service.');
