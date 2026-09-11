@@ -1,45 +1,80 @@
 <?php
 
+declare(strict_types=1);
+
+use PHPUnit\Framework\TestCase;
+use ZackKitzmiller\InvalidCharacterSet;
 use ZackKitzmiller\Tiny;
+use InvalidArgumentException;
 
-class TinyTest extends PHPUnit_Framework_TestCase {
+final class TinyTest extends TestCase
+{
+    private Tiny $tiny;
 
-    protected $tiny = null;
-
-    public function setUp() {
+    protected function setUp(): void
+    {
         $this->tiny = new Tiny('5SX0TEjkR1mLOw8Gvq2VyJxIFhgCAYidrclDWaM3so9bfzZpuUenKtP74QNH6B');
     }
 
-    public function testToTiny() {
-        $converted = $this->tiny->to(5);
-        $this->assertEquals('E', $converted);
+    public function testToTiny(): void
+    {
+        self::assertSame('E', $this->tiny->to(5));
     }
 
-    public function testFromTiny() {
-        $reversed = $this->tiny->from('E');
-        $this->assertEquals(5, $reversed);
+    public function testFromTiny(): void
+    {
+        self::assertSame(5, $this->tiny->from('E'));
     }
 
-    public function testReversingRandomInt() {
-        for ($i = 0; $i <= 100; $i++) {
-            $this->assertEquals($this->tiny->from($this->tiny->to($i)), $i);
-        }
-    }
-
-    public function testGenerateRandomSetsWork() {
+    public function testReversingRandomInt(): void
+    {
         for ($i = 0; $i <= 1000; $i++) {
-            $tiny = new Tiny(Tiny::generate_set());
-            $this->assertEquals($tiny->from($tiny->to($i)), $i);
+            self::assertSame($i, $this->tiny->from($this->tiny->to($i)));
         }
     }
 
-    public function testGenerateSetUnique() {
-        $set = Tiny::generate_set();
-        $set_parts = str_split($set);
-        $used = array();
-        foreach ($set_parts as $char) {
-            $this->assertArrayNotHasKey($char, $used);
-            $used[$char] = $char;
+    public function testNegativeValuesAreNormalized(): void
+    {
+        self::assertSame($this->tiny->to(25), $this->tiny->to(-25));
+    }
+
+    public function testGenerateRandomSetsWork(): void
+    {
+        for ($i = 0; $i <= 100; $i++) {
+            $tiny = new Tiny(Tiny::generateSet());
+            self::assertSame($i, $tiny->from($tiny->to($i)));
         }
+    }
+
+    public function testGenerateSetAliasRemainsAvailable(): void
+    {
+        self::assertSame(62, strlen(Tiny::generate_set()));
+    }
+
+    public function testGenerateSetIsUnique(): void
+    {
+        $set = Tiny::generateSet();
+        self::assertCount(62, array_unique(str_split($set)));
+    }
+
+    public function testConstructorRejectsDuplicateCharacters(): void
+    {
+        $this->expectException(InvalidCharacterSet::class);
+
+        new Tiny('aa');
+    }
+
+    public function testConstructorRejectsSmallCharacterSets(): void
+    {
+        $this->expectException(InvalidCharacterSet::class);
+
+        new Tiny('a');
+    }
+
+    public function testFromRejectsUnknownCharacters(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->tiny->from('!');
     }
 }

@@ -1,7 +1,16 @@
 {
     "name": "zackkitzmiller/tiny",
-    "description": "A reversible base62 ID obfuscater.",
+    "description": "A reversible base62-style ID obfuscator for modern PHP applications.",
+    "type": "library",
     "license": "MIT",
+    "keywords": [
+        "base62",
+        "ids",
+        "obfuscation",
+        "php",
+        "tiny"
+    ],
+    "homepage": "https://github.com/zackkitzmiller/tiny-php",
     "authors": [
         {
             "name": "Jacob DeHart"
@@ -14,14 +23,38 @@
             "email": "zack@inrpce.com"
         }
     ],
+    "support": {
+        "issues": "https://github.com/zackkitzmiller/tiny-php/issues",
+        "source": "https://github.com/zackkitzmiller/tiny-php"
+    },
     "require": {
-        "php": ">=5.3.0"
+        "php": "^8.1"
     },
     "require-dev": {
-        "phpunit/phpunit": "~3.7.0",
-        "league/phpunit-coverage-listener": "~1.1"
+        "phpunit/phpunit": "^11.5"
     },
     "autoload": {
-        "psr-0": {"ZackKitzmiller": "src/"}
+        "psr-4": {
+            "ZackKitzmiller\\": "src/ZackKitzmiller/"
+        }
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/"
+        ]
+    },
+    "bin": [
+        "bin/genset"
+    ],
+    "scripts": {
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-text",
+        "check": [
+            "@composer validate --strict",
+            "@test"
+        ]
+    },
+    "config": {
+        "sort-packages": true
     }
 }

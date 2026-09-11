@@ -2,13 +2,13 @@
 
 <?php
 
-$path = dirname(__FILE__);
+declare(strict_types=1);
 
-include $path . '/../src/ZackKitzmiller/Tiny.php';
+require dirname(__DIR__) . '/vendor/autoload.php';
 
 echo "Generating TinyPHP Random Set...\n";
 
-$set = \ZackKitzmiller\Tiny::generate_set();
+$set = \ZackKitzmiller\Tiny::generateSet();
 
 echo "Set Generated\n";
 echo "Set: {$set} \n\n";
