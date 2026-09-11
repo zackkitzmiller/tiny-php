@@ -81,3 +81,10 @@ composer check
 ## Legacy Laravel integration
 
 The repository still includes the original Laravel integration classes for older applications, but the package is now centered on the framework-agnostic core library.
+
+For Laravel integration:
+
+- register `ZackKitzmiller\TinyServiceProvider` or `ZackKitzmiller\Laravel5\TinyServiceProvider`
+- optionally register the `ZackKitzmiller\Facades\Tiny` facade alias
+- publish the config with `php artisan vendor:publish --tag=tiny-config`
+- set `TINY_KEY` in your environment or run `php artisan tiny:generate`

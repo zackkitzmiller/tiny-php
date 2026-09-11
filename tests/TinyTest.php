@@ -167,4 +167,14 @@ final class TinyTest extends TestCase
             EnvironmentKeyUpdater::updateContents($contents, 'new-key')
         );
     }
+
+    public function testEnvironmentKeyUpdaterHandlesIndentedKeys(): void
+    {
+        $contents = "  TINY_KEY=old-primary\n";
+
+        self::assertSame(
+            "TINY_KEY=new-key\n",
+            EnvironmentKeyUpdater::updateContents($contents, 'new-key')
+        );
+    }
 }

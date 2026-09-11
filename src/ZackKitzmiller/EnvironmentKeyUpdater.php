@@ -13,8 +13,8 @@ final class EnvironmentKeyUpdater
     public static function updateContents(string $contents, string $key): string
     {
         $trimmed = rtrim($contents);
-        $primaryPattern = '/^' . self::PRIMARY_KEY . '=.*$/m';
-        $legacyPattern = '/^' . self::LEGACY_KEY . '=.*$/m';
+        $primaryPattern = '/^[ \t]*' . self::PRIMARY_KEY . '=.*$/m';
+        $legacyPattern = '/^[ \t]*' . self::LEGACY_KEY . '=.*$/m';
 
         if (preg_match($primaryPattern, $contents) === 1) {
             $updated = preg_replace_callback(
