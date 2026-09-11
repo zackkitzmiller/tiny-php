@@ -8,7 +8,7 @@ Tiny is a small reversible ID obfuscator for PHP. It encodes integers into a cus
 
 - PHP 8.1+ baseline
 - PSR-4 autoloading
-- PHPUnit 11 test suite
+- PHPUnit 10/11 test suite
 - GitHub Actions CI
 - Safer alphabet validation and decoding errors
 
