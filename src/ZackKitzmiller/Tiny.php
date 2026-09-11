@@ -48,6 +48,10 @@ class Tiny
                 throw new InvalidArgumentException(sprintf('Character "%s" is not in the Tiny character set.', $character));
             }
 
+            if ($decoded > intdiv(PHP_INT_MAX - $position, $radix)) {
+                throw new InvalidArgumentException('Decoded value exceeds PHP\'s native integer range.');
+            }
+
             $decoded = ($decoded * $radix) + $position;
         }
 

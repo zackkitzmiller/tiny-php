@@ -17,18 +17,18 @@ class TinyServiceProvider extends ServiceProvider
             $this->publishes([
                 self::configPath() => config_path('tiny.php'),
             ], 'tiny-config');
+
+            $this->commands(['tiny.generate']);
         }
-
-        $this->app->singleton('tiny.generate', static function ($app) {
-            return new TinyGenerateCommand($app['files']);
-        });
-
-        $this->commands(['tiny.generate']);
     }
 
     public function register(): void
     {
         $this->mergeConfigFrom(self::configPath(), 'tiny');
+
+        $this->app->singleton('tiny.generate', static function ($app) {
+            return new TinyGenerateCommand($app['files']);
+        });
 
         $this->app->singleton('tiny', static function ($app) {
             $key = $app['config']->get('tiny.key');
