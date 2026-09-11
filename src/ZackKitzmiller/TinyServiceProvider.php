@@ -1,34 +1,52 @@
-<?php namespace ZackKitzmiller;
+<?php
+
+declare(strict_types=1);
+
+namespace ZackKitzmiller;
 
 use Illuminate\Support\ServiceProvider;
+use RuntimeException;
 
-class TinyServiceProvider extends ServiceProvider {
-
-    public function boot()
+class TinyServiceProvider extends ServiceProvider
+{
+    public function boot(): void
     {
-        $this->package('zackkitzmiller/tiny', 'zackkitzmiller/tiny', __DIR__.'/../');
+        if ($this->app->runningInConsole() && function_exists('config_path')) {
+            $this->publishes([
+                __DIR__ . '/../config/config.php' => config_path('tiny.php'),
+            ], 'tiny-config');
 
-        $this->app['tiny.generate'] = $this->app->share(function($app)
-        {
+            $this->commands(['tiny.generate']);
+        }
+    }
+
+    public function register(): void
+    {
+        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'tiny');
+
+        $this->app->singleton('tiny.generate', function ($app) {
             return new TinyGenerateCommand($app['files']);
         });
 
-        $this->commands('tiny.generate');
-    }
+        $this->app->singleton('tiny', function ($app) {
+            $key = $app['config']->get('tiny.key');
 
-    public function register()
-    {
-        $this->app['tiny'] = $this->app->share(function($app)
-        {
-            $key = $app['config']['zackkitzmiller/tiny::key'];
+            if ($key === null || $key === false) {
+                $primaryKey = getenv(EnvironmentKeyUpdater::PRIMARY_KEY);
+                $legacyKey = getenv(EnvironmentKeyUpdater::LEGACY_KEY);
+                $key = $primaryKey !== false ? $primaryKey : $legacyKey;
+            }
+
+            if (! is_string($key) || $key === '') {
+                throw new RuntimeException('A Tiny character set must be configured before resolving the Tiny service.');
+            }
 
             return new Tiny($key);
         });
     }
 
-    public function provides()
+    public function provides(): array
     {
-        return array('tiny');
+        return ['tiny'];
     }
-
 }

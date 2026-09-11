@@ -1,32 +1,31 @@
-[![Build Status](https://travis-ci.org/zackkitzmiller/tiny-php.png?branch=master)](https://travis-ci.org/zackkitzmiller/tiny-php)
-[![Coverage Status](https://coveralls.io/repos/zackkitzmiller/tiny-php/badge.png?branch=master)](https://coveralls.io/r/zackkitzmiller/tiny-php?branch=master)
+[![CI](https://github.com/zackkitzmiller/tiny-php/actions/workflows/ci.yml/badge.svg)](https://github.com/zackkitzmiller/tiny-php/actions/workflows/ci.yml)
 
 # Tiny
 
-A reversible base62 ID obfuscater
+Tiny is a small reversible ID obfuscator for PHP. It encodes integers into a custom alphabet and decodes them back again.
 
-## Authors
+## What's modernized
 
-Originally by Jacob DeHart, with Ruby and Python ports by Kyle Bragger
-
-Now maintained by [Zack Kitzmiller](https://github.com/zackkitzmiller).
+- PHP 8.1+ baseline
+- PSR-4 autoloading
+- PHPUnit 10/11 test suite
+- GitHub Actions CI
+- Safer alphabet validation and decoding errors
 
 ## Installation
 
-Install via Composer
-
-```json
-{
-    "require": {
-        "zackkitzmiller/tiny": "1.2.0"
-    },
-}
+```bash
+composer require zackkitzmiller/tiny
 ```
 
 ## Usage
 
 ```php
-$tiny = new \ZackKitzmiller\Tiny('5SX0TEjkR1mLOw8Gvq2VyJxIFhgCAYidrclDWaM3so9bfzZpuUenKtP74QNH6B');
+<?php
+
+use ZackKitzmiller\Tiny;
+
+$tiny = new Tiny('5SX0TEjkR1mLOw8Gvq2VyJxIFhgCAYidrclDWaM3so9bfzZpuUenKtP74QNH6B');
 
 echo $tiny->to(5);
 // E
@@ -39,47 +38,59 @@ echo $tiny->to(126);
 
 echo $tiny->from('XX');
 // 126
-
-echo $tiny->to(999);
-// vk
-
-echo $tiny->from('vk');
-// 999
-
 ```
 
-## Configuration
+## Character set rules
 
-You must instanciate a new instance of Tiny with a random alpha-numeric set where each character must only be used exactly once. Do **NOT** change this once you start using Tiny, as you won't be able to reverse.
+Your alphabet must:
 
-You can generate a random set from the commandline with `$ ./bin/genset`
+- contain at least 2 characters
+- only contain unique characters
+- stay fixed forever once you start issuing encoded IDs
 
-## Using laravel?
+Tiny throws an exception when the alphabet is invalid or when you try to decode characters that are not in the configured alphabet.
 
-If you're using laravel and want to use a more laravel-like and cleaner syntax you only have to follow these steps.
+## Generate an alphabet
 
-First open your ``app/config/app.php`` file and scroll down to your providers and add
+After installing dependencies, generate a fresh 62-character alphabet with:
+
+```bash
+./bin/genset
+```
+
+You can also generate one in code:
+
 ```php
-'providers' => array(
-    ...
-    'ZackKitzmiller\TinyServiceProvider',
-)
-```
-and then this to aliases
-```php
-'aliases' => array(
-    ...
-    'Tiny' => 'ZackKitzmiller\Facades\Tiny',
-)
+$set = \ZackKitzmiller\Tiny::generateSet();
 ```
 
-Lastly you run ``php artisan config:publish zackkitzmiller/tiny`` to publish the configuration file and then run ``php artisan tiny:generate`` to create a valid key.
+The legacy `Tiny::generate_set()` helper is still available for backwards compatibility.
 
-### Usage in Laravel
-```php
-echo Tiny::to(999);
-// echos vk
+This release does introduce a package-level modernization break: Composer autoloading now uses PSR-4 for `ZackKitzmiller\\` classes, so consumers relying on older PSR-0-era assumptions should verify their integration when upgrading.
 
-echo Tiny::from('E');
-// echos 5
+The Laravel integration classes continue to autoload from the `ZackKitzmiller\\Laravel5\\` namespace under `src/ZackKitzmiller/Laravel5/`.
+
+## Development
+
+```bash
+composer install
+composer test
+composer check
 ```
+
+## Legacy Laravel integration
+
+The repository still includes the original Laravel integration classes for older applications, but the package is now centered on the framework-agnostic core library.
+
+For Laravel integration:
+
+- Laravel 5+:
+  - register `ZackKitzmiller\Laravel5\TinyServiceProvider`
+  - optionally register the `ZackKitzmiller\Facades\Tiny` facade alias
+  - publish the config with `php artisan vendor:publish --tag=tiny-config`
+  - set `TINY_KEY` in your environment or run `php artisan tiny:generate`
+- older Laravel integrations:
+  - register `ZackKitzmiller\TinyServiceProvider`
+  - optionally register the `ZackKitzmiller\Facades\Tiny` facade alias
+  - publish the package configuration with the framework command your app version expects
+  - run `php artisan tiny:generate` to persist the generated key

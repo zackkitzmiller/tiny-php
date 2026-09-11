@@ -1,30 +1,59 @@
-<?php namespace ZackKitzmiller\Laravel5;
+<?php
 
-use ZackKitzmiller\Tiny;
+declare(strict_types=1);
+
+namespace ZackKitzmiller\Laravel5;
+
 use Illuminate\Support\ServiceProvider;
+use RuntimeException;
+use ZackKitzmiller\EnvironmentKeyUpdater;
+use ZackKitzmiller\Tiny;
 
 class TinyServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
-        $this->app->singleton('tiny.generate', function () {
-            return new TinyGenerateCommand();
-        });
+        if ($this->app->runningInConsole() && function_exists('config_path')) {
+            $this->publishes([
+                self::configPath() => config_path('tiny.php'),
+            ], 'tiny-config');
 
-        $this->commands('tiny.generate');
+            $this->commands(['tiny.generate']);
+        }
     }
 
-    public function register()
+    public function register(): void
     {
-        $this->app->singleton('tiny', function () {
-            $key = getenv('LEAGUE_TINY_KEY');
+        $this->mergeConfigFrom(self::configPath(), 'tiny');
+
+        $this->app->singleton('tiny.generate', static function ($app) {
+            return new TinyGenerateCommand($app['files']);
+        });
+
+        $this->app->singleton('tiny', static function ($app) {
+            $key = $app['config']->get('tiny.key');
+
+            if ($key === null || $key === false) {
+                $primaryKey = getenv(EnvironmentKeyUpdater::PRIMARY_KEY);
+                $legacyKey = getenv(EnvironmentKeyUpdater::LEGACY_KEY);
+                $key = $primaryKey !== false ? $primaryKey : $legacyKey;
+            }
+
+            if (! is_string($key) || $key === '') {
+                throw new RuntimeException('A Tiny character set must be configured before resolving the Tiny service.');
+            }
 
             return new Tiny($key);
         });
     }
 
-    public function provides()
+    public function provides(): array
     {
-        return array('tiny');
+        return ['tiny'];
+    }
+
+    private static function configPath(): string
+    {
+        return dirname(__DIR__, 2) . '/config/config.php';
     }
 }

@@ -1,43 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<phpunit colors="true" bootstrap="vendor/autoload.php">
+<phpunit bootstrap="vendor/autoload.php" colors="true">
     <testsuites>
         <testsuite name="Tiny Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
-    <logging>
-        <log type="coverage-clover" target="build/coverage.xml"/>
-    </logging>
-    <filter>
-        <whitelist>
-            <file>src/ZackKitzmiller/Tiny.php</file>
-        </whitelist>
-    </filter>
-    <listeners>
-        <listener class="League\PHPUnitCoverageListener\Listener">
-            <arguments>
-                <array>
-                    <element key="printer">
-                      <object class="League\PHPUnitCoverageListener\Printer\StdOut"/>
-                    </element>
-                    <element key="hook">
-                      <object class="League\PHPUnitCoverageListener\Hook\Travis"/>
-                    </element>
-                    <element key="namespace">
-                        <string>ZackKitzmiller</string>
-                    </element>
-                    <element key="repo_token">
-                        <string>4GggSuZVGvVaxBi8E9IZTqG31EXFvjMe7</string>
-                    </element>
-                    <element key="target_url">
-                        <string>https://coveralls.io/api/v1/jobs</string>
-                    </element>
-                    <element key="coverage_dir">
-                        <string>build/</string>
-                    </element>
-                </array>
-            </arguments>
-        </listener>
-    </listeners>
 </phpunit>

@@ -1,5 +1,7 @@
-vendor
+vendor/
 composer.phar
 composer.lock
 .DS_Store
-build
+build/
+.phpunit.cache/
+.phpunit.result.cache
