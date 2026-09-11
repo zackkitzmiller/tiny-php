@@ -11,7 +11,7 @@ class TinyServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        if (function_exists('config_path')) {
+        if ($this->app->runningInConsole() && function_exists('config_path')) {
             $this->publishes([
                 __DIR__ . '/../config/config.php' => config_path('tiny.php'),
             ], 'tiny-config');

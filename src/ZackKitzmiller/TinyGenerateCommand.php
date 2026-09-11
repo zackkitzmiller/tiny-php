@@ -26,8 +26,8 @@ class TinyGenerateCommand extends Command
         $contents = EnvironmentKeyUpdater::updateContents($contents, $key);
 
         $this->writeEnvironmentFile($path, $contents);
-        $this->laravel['config']['tiny.key'] = $key;
-        $this->laravel['config']['zackkitzmiller/tiny::key'] = $key;
+        $this->laravel['config']->set('tiny.key', $key);
+        $this->laravel['config']->set('zackkitzmiller/tiny::key', $key);
 
         $this->info("Tiny key [{$key}] has been set.");
 
