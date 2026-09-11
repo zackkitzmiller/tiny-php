@@ -78,6 +78,18 @@ final class TinyGenerateCommandEnvironmentPathTest extends TestCase
     }
 
     /**
+     * @dataProvider commandClasses
+     */
+    public function testRejectsUnsafeEnvironmentNames(string $commandClass, string $defaultPath): void
+    {
+        $command = $this->makeCommand($commandClass, new FakeLaravelApplication(dirname($defaultPath), $defaultPath), '../staging');
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->environmentFilePath($command);
+    }
+
+    /**
      * @param class-string $commandClass
      */
     private function makeCommand(string $commandClass, FakeLaravelApplication $laravel, ?string $environment = null): object

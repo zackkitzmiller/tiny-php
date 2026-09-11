@@ -89,7 +89,15 @@ class TinyGenerateCommand extends Command
     {
         $environment = $this->option('env');
 
-        return is_string($environment) && $environment !== '' ? $environment : null;
+        if (! is_string($environment) || $environment === '') {
+            return null;
+        }
+
+        if (preg_match('/\A[A-Za-z0-9_-]+\z/', $environment) !== 1) {
+            throw new \InvalidArgumentException('The --env option may only contain letters, numbers, dashes, and underscores.');
+        }
+
+        return $environment;
     }
 
     private function updateLegacyConfigFile(string $key): void
