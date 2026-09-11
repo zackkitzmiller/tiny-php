@@ -80,9 +80,10 @@ class TinyGenerateCommand extends Command
         }
 
         $contents = $this->readEnvironmentFile($path);
+        $escapedKey = addcslashes($key, "\\'");
         $updated = preg_replace_callback(
             "/('key'\\s*=>\\s*)([^,]+)(,?)/",
-            static fn (array $matches): string => $matches[1] . "'" . $key . "'" . $matches[3],
+            static fn (array $matches): string => $matches[1] . "'" . $escapedKey . "'" . $matches[3],
             $contents,
             1,
             $count

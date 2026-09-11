@@ -157,4 +157,14 @@ final class TinyTest extends TestCase
             EnvironmentKeyUpdater::updateContents($contents, 'new-key')
         );
     }
+
+    public function testEnvironmentKeyUpdaterPrefersTinyKeyRegardlessOfOrder(): void
+    {
+        $contents = "LEAGUE_TINY_KEY=old-legacy\nTINY_KEY=old-primary\n";
+
+        self::assertSame(
+            "LEAGUE_TINY_KEY=old-legacy\nTINY_KEY=new-key\n",
+            EnvironmentKeyUpdater::updateContents($contents, 'new-key')
+        );
+    }
 }
