@@ -97,6 +97,13 @@ final class TinyTest extends TestCase
         $this->tiny->to((string) PHP_INT_MAX . '0');
     }
 
+    public function testToRejectsMinimumIntegerString(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->tiny->to((string) PHP_INT_MIN);
+    }
+
     public function testEnvironmentKeyUpdaterReplacesExistingKeys(): void
     {
         $contents = "APP_ENV=testing\nLEAGUE_TINY_KEY=old-key\n";

@@ -97,6 +97,10 @@ class Tiny
             throw new InvalidArgumentException('Tiny can only encode whole-number integers.');
         }
 
+        if ($id === (string) PHP_INT_MIN) {
+            throw new InvalidArgumentException('Tiny cannot encode values smaller than PHP_INT_MIN + 1.');
+        }
+
         $normalized = ltrim($id, '+-');
         $normalized = ltrim($normalized, '0');
         $normalized = $normalized === '' ? '0' : $normalized;
