@@ -63,6 +63,20 @@ class TinyGenerateCommand extends Command
 
     private function environmentFilePath(): string
     {
+        $environment = $this->environmentOption();
+
+        if ($environment !== null) {
+            if (method_exists($this->laravel, 'environmentPath')) {
+                return rtrim($this->laravel->environmentPath(), '/\\') . '/.env.' . $environment;
+            }
+
+            if (method_exists($this->laravel, 'basePath')) {
+                return $this->laravel->basePath('.env.' . $environment);
+            }
+
+            return $this->laravel['path.base'] . '/.env.' . $environment;
+        }
+
         if (method_exists($this->laravel, 'environmentFilePath')) {
             return $this->laravel->environmentFilePath();
         }
@@ -72,5 +86,12 @@ class TinyGenerateCommand extends Command
         }
 
         return $this->laravel['path.base'] . '/.env';
+    }
+
+    private function environmentOption(): ?string
+    {
+        $environment = $this->option('env');
+
+        return is_string($environment) && $environment !== '' ? $environment : null;
     }
 }
