@@ -19,7 +19,13 @@ final class EnvironmentKeyUpdater
         ];
 
         foreach ($patterns as $pattern) {
-            $updated = preg_replace($pattern, self::PRIMARY_KEY . '=' . $key, $contents, 1, $count);
+            $updated = preg_replace_callback(
+                $pattern,
+                static fn (): string => self::PRIMARY_KEY . '=' . $key,
+                $contents,
+                1,
+                $count
+            );
 
             if ($updated !== null && $count > 0) {
                 return $updated;

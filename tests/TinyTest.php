@@ -88,6 +88,15 @@ final class TinyTest extends TestCase
         $this->tiny->from('!');
     }
 
+    public function testFromRejectsValuesThatOverflowNativeIntegers(): void
+    {
+        $tiny = new Tiny('ab');
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $tiny->from(str_repeat('b', 128));
+    }
+
     public function testToRejectsNonIntegerStrings(): void
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -126,6 +135,16 @@ final class TinyTest extends TestCase
         self::assertSame(
             "APP_ENV=testing\nTINY_KEY=new-key\n",
             EnvironmentKeyUpdater::updateContents($contents, 'new-key')
+        );
+    }
+
+    public function testEnvironmentKeyUpdaterPreservesLiteralSpecialCharacters(): void
+    {
+        $contents = "TINY_KEY=old-key\n";
+
+        self::assertSame(
+            'TINY_KEY=value$1\path' . PHP_EOL,
+            EnvironmentKeyUpdater::updateContents($contents, 'value$1\\path')
         );
     }
 }

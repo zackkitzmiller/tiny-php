@@ -15,18 +15,18 @@ class TinyServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__ . '/../config/config.php' => config_path('tiny.php'),
             ], 'tiny-config');
+
+            $this->commands(['tiny.generate']);
         }
-
-        $this->app->singleton('tiny.generate', function ($app) {
-            return new TinyGenerateCommand($app['files']);
-        });
-
-        $this->commands(['tiny.generate']);
     }
 
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'tiny');
+
+        $this->app->singleton('tiny.generate', function ($app) {
+            return new TinyGenerateCommand($app['files']);
+        });
 
         $this->app->singleton('tiny', function ($app) {
             $key = $app['config']->get('tiny.key');

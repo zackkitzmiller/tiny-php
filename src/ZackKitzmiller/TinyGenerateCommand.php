@@ -20,12 +20,13 @@ class TinyGenerateCommand extends Command
 
     public function handle(): int
     {
-        $path = $this->environmentFilePath();
-        $contents = is_file($path) ? $this->readEnvironmentFile($path) : '';
         $key = Tiny::generateSet();
+        $environmentPath = $this->environmentFilePath();
+        $contents = is_file($environmentPath) ? $this->readEnvironmentFile($environmentPath) : '';
         $contents = EnvironmentKeyUpdater::updateContents($contents, $key);
 
-        $this->writeEnvironmentFile($path, $contents);
+        $this->writeEnvironmentFile($environmentPath, $contents);
+        $this->updateLegacyConfigFile($key);
         $this->laravel['config']->set('tiny.key', $key);
         $this->laravel['config']->set('zackkitzmiller/tiny::key', $key);
 
@@ -68,5 +69,39 @@ class TinyGenerateCommand extends Command
         }
 
         return $this->laravel['path.base'] . '/.env';
+    }
+
+    private function updateLegacyConfigFile(string $key): void
+    {
+        $path = $this->legacyConfigFilePath();
+
+        if ($path === null || ! is_file($path)) {
+            return;
+        }
+
+        $contents = $this->readEnvironmentFile($path);
+        $updated = preg_replace_callback(
+            "/('key'\\s*=>\\s*)([^,]+)(,?)/",
+            static fn (array $matches): string => $matches[1] . "'" . $key . "'" . $matches[3],
+            $contents,
+            1,
+            $count
+        );
+
+        if ($updated !== null && $count > 0) {
+            $this->writeEnvironmentFile($path, $updated);
+        }
+    }
+
+    private function legacyConfigFilePath(): ?string
+    {
+        if (! isset($this->laravel['path'])) {
+            return null;
+        }
+
+        $environment = $this->option('env');
+        $environment = is_string($environment) && $environment !== '' ? $environment . '/' : '';
+
+        return $this->laravel['path'] . "/config/packages/zackkitzmiller/tiny/{$environment}config.php";
     }
 }
