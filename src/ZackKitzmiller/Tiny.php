@@ -17,7 +17,7 @@ class Tiny {
         $radix = strlen($set);
         while (true) {
             $r = $id % $radix;
-            $hexn = $set{$r} . $hexn;
+            $hexn = $set[$r] . $hexn;
             $id = ($id - $r) / $radix;
             if ($id == 0) {
                 break;
@@ -34,7 +34,7 @@ class Tiny {
         $strlen = strlen($str);
         $n = 0;
         for ($i = 0; $i < $strlen; $i++) {
-            $n += strpos($set, $str{$i}) * pow($radix, ($strlen - $i - 1));
+            $n += strpos($set, $str[$i]) * pow($radix, ($strlen - $i - 1));
         }
         return $n;
     }
