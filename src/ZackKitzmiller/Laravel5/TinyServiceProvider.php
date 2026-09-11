@@ -34,11 +34,9 @@ class TinyServiceProvider extends ServiceProvider
             $key = $app['config']->get('tiny.key');
 
             if ($key === null || $key === false) {
-                $key = getenv(EnvironmentKeyUpdater::PRIMARY_KEY);
-            }
-
-            if ($key === false) {
-                $key = getenv(EnvironmentKeyUpdater::LEGACY_KEY);
+                $primaryKey = getenv(EnvironmentKeyUpdater::PRIMARY_KEY);
+                $legacyKey = getenv(EnvironmentKeyUpdater::LEGACY_KEY);
+                $key = $primaryKey !== false ? $primaryKey : $legacyKey;
             }
 
             if (! is_string($key) || $key === '') {

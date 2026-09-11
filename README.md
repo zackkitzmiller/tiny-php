@@ -84,7 +84,13 @@ The repository still includes the original Laravel integration classes for older
 
 For Laravel integration:
 
-- register `ZackKitzmiller\TinyServiceProvider` or `ZackKitzmiller\Laravel5\TinyServiceProvider`
-- optionally register the `ZackKitzmiller\Facades\Tiny` facade alias
-- publish the config with `php artisan vendor:publish --tag=tiny-config`
-- set `TINY_KEY` in your environment or run `php artisan tiny:generate`
+- Laravel 5+:
+  - register `ZackKitzmiller\Laravel5\TinyServiceProvider`
+  - optionally register the `ZackKitzmiller\Facades\Tiny` facade alias
+  - publish the config with `php artisan vendor:publish --tag=tiny-config`
+  - set `TINY_KEY` in your environment or run `php artisan tiny:generate`
+- older Laravel integrations:
+  - register `ZackKitzmiller\TinyServiceProvider`
+  - optionally register the `ZackKitzmiller\Facades\Tiny` facade alias
+  - publish the package configuration with the framework command your app version expects
+  - run `php artisan tiny:generate` to persist the generated key
