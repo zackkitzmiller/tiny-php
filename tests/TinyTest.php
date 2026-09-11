@@ -5,7 +5,6 @@ declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 use ZackKitzmiller\InvalidCharacterSet;
 use ZackKitzmiller\Tiny;
-use InvalidArgumentException;
 
 final class TinyTest extends TestCase
 {
@@ -73,7 +72,7 @@ final class TinyTest extends TestCase
 
     public function testFromRejectsUnknownCharacters(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
 
         $this->tiny->from('!');
     }
